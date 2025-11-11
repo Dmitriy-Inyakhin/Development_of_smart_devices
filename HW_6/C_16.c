@@ -12,8 +12,10 @@
 
 int is_prime(int n)
 {
-    for(int i = 2; i < n; i++){
-        if(n % i == 0) {
+    for (int i = 2; i < n; i++)
+    {
+        if (n % i == 0)
+        {
             return 0;
         }
     }
@@ -28,7 +30,8 @@ int main(int argc, char **argv)
         printf("Input error.\n");
         return 0;
     }
-    if(number == 1 ||number == 0) {
+    if (number == 1 || number == 0)
+    {
         printf("NO\n");
         return 0;
     }

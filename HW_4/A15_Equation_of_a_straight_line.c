@@ -1,12 +1,13 @@
 #include <stdio.h>
 
-int main() {
+int main()
+{
     double x1, y1, x2, y2;
     scanf("%lf %lf %lf %lf", &x1, &y1, &x2, &y2);
 
-
     // Проверка на вертикальную прямую
-    if (x1 == x2) {
+    if (x1 == x2)
+    {
         // Уравнение y = k*x + b невозможно записать
         // Выводим, например, "NO" или специальное сообщение
         printf("The line is vertical\n");

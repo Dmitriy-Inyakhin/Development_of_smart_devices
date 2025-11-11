@@ -23,6 +23,7 @@ int main()
         }
         if (ch == ')')
         {
+
             summ--;
             if (summ < 0)
             {

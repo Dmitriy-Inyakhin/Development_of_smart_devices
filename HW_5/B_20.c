@@ -8,28 +8,36 @@
 
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int number;
     int priznak = 0;
 
-    if(scanf("%d", &number) != 1) {
+    if (scanf("%d", &number) != 1)
+    {
         printf("Imput error.\n");
         return 0;
     }
-    if(number == 1 ){
+    if (number == 1)
+    {
         printf("NO\n");
         return 0;
     }
-    for(int i =2; i< number; i++) {
-        if(number % i == 0) {
+    for (int i = 2; i < number; i++)
+    {
+        if (number % i == 0)
+        {
             priznak++;
         }
     }
-        if(priznak == 0) {
-                printf("YES\n");
-            } else {
-                printf("NO\n");
-            }
-    
+    if (priznak == 0)
+    {
+        printf("YES\n");
+    }
+    else
+    {
+        printf("NO\n");
+    }
+
     return 0;
 }
