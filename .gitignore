@@ -1,4 +1,4 @@
-﻿# Игнорировать всё
+# Игнорировать всё
 *
 *.json
 .vscode/*
@@ -13,6 +13,6 @@
 # Обязательно разрешить сам .gitignore
 !.gitignore
 
-.DS_Store
+.DS_Store/*
 *.DS_Store
 .vscode/
