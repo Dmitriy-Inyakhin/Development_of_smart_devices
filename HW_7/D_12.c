@@ -8,39 +8,40 @@
 // Output format
 //     Последовательность целых чисел.
 
+
 #include <stdio.h>
 
-void print_n(int);
+// Вспомогательная функция: какой элемент на позиции i (1-based)?
+int kth_term(int i) {
+    int k = 1;
+    int total = 0;
+    while (total + k < i) {
+        total += k;
+        k++;
+    }
+    return k;
+}
 
-int main(int argc, char **argv)
-{
-    int n = 0;
-    if (scanf("%d", &n) != 1 || n <= 0)
-    {
+// Рекурсивная функция с ОДНИМ аргументом
+void print_seq(int n) {
+    if (n <= 0) return;
+
+    if (n == 1) {
+        printf("1");
+    } else {
+        print_seq(n - 1);          // сначала выведем первые n-1
+        printf(" %d", kth_term(n)); // затем n-й элемент
+    }
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1 || n <= 0) {
         fprintf(stderr, "Input error.\n");
         return 1;
     }
 
-    print_n(n);
+    print_seq(n);
     printf("\n");
     return 0;
-}
-
-void print_n(int n)
-{
-    static int count = 0;
-    static int predel = 0;
-    predel = n;
-    if (n > 1)
-    {
-        print_n(n - 1);
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        if (count++ < predel)
-        {
-            return;
-        }
-        printf("%d ", n);
-    }
 }
