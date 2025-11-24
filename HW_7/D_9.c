@@ -36,4 +36,25 @@ int sum_digits(int n)
     return (n % 10) + sum_digits(n / 10);
 }
 
+   
+
+#include <stdio.h>
+
+int main() {
+    int a, b, c;
     
+    if (scanf("%d %d %d", &a, &b, &c) != 3) {
+        fprintf(stderr, "Ошибка: ожидалось три целых числа.\n");
+        return 1; // Ненулевой код возврата — означает ошибку
+    }
+
+    int sum = a + b + c;
+    int prod = a * b * c;
+    double avg = (double)sum / 3.0;
+
+    printf("%d+%d+%d=%d\n", a, b, c, sum);
+    printf("%d*%d*%d=%d\n", a, b, c, prod);
+    printf("(%d+%d+%d)/3=%.2f\n", a, b, c, avg);
+
+    return 0;
+}
