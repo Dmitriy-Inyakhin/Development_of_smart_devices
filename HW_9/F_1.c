@@ -16,59 +16,142 @@
 //     Функция ничего не возвращает. Производит сортировку переданного
 // ей массива по возрастанию.
 
+// #include <stdio.h>
+// #define SIZE 20
+// void print_array(int size, int ar[]);
+// void sort_array(int size, int ar[]);
+
+// int main(int args, char **argv)
+// {
+//     int var[SIZE] = {0};
+
+//     for (int i = 0; i < SIZE; i++)
+//     {
+//         if (scanf("%d", &var[i]) != 1)
+//         {
+//             fprintf(stderr, "Input error!\n");
+//             return 0;
+//         }
+//     }
+//     sort_array(sizeof(var) / sizeof(var[0]), var);
+//     print_array(sizeof(var) / sizeof(var[0]), var);
+//     return 0;
+// }
+
+// void sort_array(int size, int ar[])
+// {
+//     int i = 0;
+//     _Bool flag;
+//     do
+//     {
+//         flag = 0;
+//         for (int j = size - 2; j >= i; j--)
+//         {
+//             if (ar[j] > ar[j + 1])
+//             {
+//                 int temp = ar[j];
+//                 ar[j] = ar[j + 1];
+//                 ar[j + 1] = temp;
+//                 flag = 1;
+//             }
+//         }
+//         i++;
+//     } while (flag);
+// }
+
+// void print_array(int size, int ar[])
+// {
+//     for (int i = 0; i < size; ++i)
+//     {
+//         if (i > 0)
+//         {
+//             putchar(' ');
+//         }
+//         printf("%d", ar[i]);
+//     }
+//     putchar('\n');
+// }
+
 #include <stdio.h>
-#define SIZE 20
-void print_array(int size, int ar[]);
-void sort_array(int size, int ar[]);
 
-int main(int args, char **argv)
+//функция ввода последовательности чисел из буфера
+int Input(int arr[], int n)
 {
-    int var[SIZE] = {0};
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        if (scanf("%d", &var[i]) != 1)
-        {
-            fprintf(stderr, "Input error!\n");
-            return 0;
-        }
-    }
-    sort_array(sizeof(var) / sizeof(var[0]), var);
-    print_array(sizeof(var) / sizeof(var[0]), var);
-    return 0;
+    int i =0, num;
+    while (i < n && scanf("%d", &num) == 1)
+        arr[i++] = num;
+    return i;
 }
 
-void sort_array(int size, int ar[])
+// функция проверяет является ли символ цифрой
+int isDigit(char c) 
+{
+    return ((c >= '0') && (c <= '9'));
+}
+
+//функция ввода последовательности чисел
+int InputGet(int arr[], int n)
+{
+    int i=0;
+    char c;
+    while ((c = getchar()) != '\n')
+    {
+        if (isDigit(c))
+        {
+            int number = 0;
+            do
+            {
+                number = number * 10 + c - '0';
+                c = getchar();
+            } while (isDigit(c));
+            arr[i++] = number;
+            if (c == '\n')
+                break;
+        }
+    }
+    return i;
+}
+
+// функция сортировки пузырьком
+void BubbleSort(int arr[], int n)
 {
     int i = 0;
-    _Bool flag;
-    do
+    int j = 0;
+    int temp = 0;
+    for (i = 0; i < n-1; ++i)
     {
-        flag = 0;
-        for (int j = size - 2; j >= i; j--)
+        for (j = 0; j < n-i-1; ++j)
         {
-            if (ar[j] > ar[j + 1])
+            if (arr[j] > arr[j + 1])
             {
-                int temp = ar[j];
-                ar[j] = ar[j + 1];
-                ar[j + 1] = temp;
-                flag = 1;
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j +1] = temp;
             }
         }
-        i++;
-    } while (flag);
-}
-
-void print_array(int size, int ar[])
-{
-    for (int i = 0; i < size; ++i)
-    {
-        if (i > 0)
-        {
-            putchar(' ');
-        }
-        printf("%d", ar[i]);
     }
-    putchar('\n');
 }
 
+//функция печати массива
+void Print(int arr[], int len)
+{
+    for (int i = 0; i < len; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+}
+
+
+int main()
+{
+    enum
+    {
+        BUFFER_SIZE = 20
+    };
+
+    int buffer[BUFFER_SIZE];                    //объявляем массив целых чисел
+    int size = Input(buffer, BUFFER_SIZE);   //вычисляеем размер массива
+    printf("size =%d\n", size);                 // печать размера массива
+    BubbleSort(buffer, size);                   //сортировка массива
+    Print(buffer, size);                        //печать массива
+    return 0;
+}
