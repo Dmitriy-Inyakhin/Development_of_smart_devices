@@ -6,6 +6,7 @@
 *temp*
 *CodeRunner*
 *tmp*
+*tempCodeRunnerFile.c
 
 
 # Исключить файлы .c из игнорирования
@@ -18,6 +19,7 @@
 
 # Обязательно разрешить сам .gitignore
 !.gitignore
+!makefile
 
 .DS_Store/*
 *.DS_Store
