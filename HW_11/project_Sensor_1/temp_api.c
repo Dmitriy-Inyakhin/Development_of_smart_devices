@@ -80,6 +80,7 @@ int save_data_to_file(const sensor_data *d, const char *filename) {
     return (written == 1 + d->number) ? 0 : -4;
 }
 
+
 int load_data_from_file(sensor_data *d, const char *filename) {
     if (!d || !filename) return -1;
     FILE *f = safe_fopen(filename, "rb");
