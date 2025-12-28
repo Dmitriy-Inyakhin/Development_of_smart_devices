@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "temp_functions.h"
 
+#define MAX_RECORDS 650000
+
 // === Функции работы с файлами ===
 
 // Функция safe_fopen - это "безопасная" обертка над стандартной функцией fopen из языка C
@@ -11,7 +13,7 @@ FILE *safe_fopen(const char *path, const char *mode)
     FILE *f = fopen(path, mode);
     if (!f)
     {
-        fprintf(stderr, "Oshibka otkrytiya faila '%s' v rezhime '%s': ", path, mode);
+        fprintf(stderr, "Ошибка открытия файла '%s' в режиме '%s': ", path, mode);
         perror("");
     }
     return f;
@@ -107,13 +109,13 @@ int print_monthly_stats(const sensor_data *data, uint16_t year, uint8_t month)
 {
     if (!data)
     {
-        fprintf(stderr, "Error: invalid data pointer (NULL)\n");
+        fprintf(stderr, "Ошибка: ошибка данных (NULL)\n");
         return -1;
     }
 
     if (data->number == 0)
     {
-        fprintf(stderr, "Error: empty dataset\n");
+        fprintf(stderr, "Ошибка: пустой набор данных\n");
         return -1;
     }
 
@@ -220,13 +222,13 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
 {
     if (!data)
     {
-        fprintf(stderr, "Error: invalid data pointer (NULL)\n");
+        fprintf(stderr, "Ошибка: ошибка данных (NULL)\n");
         return -1;
     }
 
     if (data->number == 0)
     {
-        fprintf(stderr, "Error: empty dataset\n");
+        fprintf(stderr, "Ошибка: пустой набор данных\n");
         return -1;
     }
 
@@ -334,21 +336,22 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
 
 void print_help()
 {
-    printf("===================================\n");
-    printf("Ispol'zovanie: sensor_app.exe [klyuch]...\n");
-    printf("Klyuchi:\n");
-    printf("  -h        etot help\n");
-    printf("  -f        nazvanie fayla, iz kotorogo berutsya dannye s datchika\n");
-    printf("  -y        god, za kotoryy proizvoditsya statistika\n");
-    printf("            esli vvoditsya YY, to avtomaticheski formiruetsya god 20 + vvedennoe chislo\n");
-    printf("            esli vvoditsya YYYY, to ispol'zuetsya vvedennoe chislo\n");
-    printf("            Esli ukazan, to default 2025\n");
-    printf("  -m        mesyats, za kotoryy proizvoditsya statistika\n");
-    printf("            Ne obyazatel'nyy argument. Esli ne ukazan, to privoditsya statistika za god\n");
-    printf("            Esli ukazan, to privoditsya statistika za ukazannyy mesyats ukazannogo goda\n");
+    printf("======================================================================\n");
+    printf("Применение: sensor_app.exe [ключ]...\n");
+    printf("Ключи:\n");
+    printf("  -h        этот хэлп\n");
+    printf("  -f        название файла, из которого берутся данные с датчика для анализа\n");
+    printf("  -y        год, за который производится статистика\n");
+    printf("            если вводится YY, то автоматически формируется год 20 + введенное число\n");
+    printf("            если вводится YYYY, то используется введенное число\n");
+    printf("            если не указан год, то по умолчанию 2021\n");
+    printf("  -m        месяц, за который производится статистика\n");
+    printf("            Если месяц не указан, то статистика приводится завесь указаный год\n");
+    printf("            Если указан, то приводится статистика за указанный месяц указанного года\n");
+    printf("  -?        Если указан неизвестный ключ, то программа выводит хелп и завершается\n");
     printf("\n");
-    printf("This program built for GNU Make 3.81");
-    printf("Report bugs to <010302@rambler.ru>\n");
-    printf("===================================\n");
+    printf("Эта программа собрана в GNU Make 3.81\n");
+    printf("О всех ошибках и сбоях сообщить на <010302@rambler.ru>\n");
+    printf("======================================================================\n");
 }
 

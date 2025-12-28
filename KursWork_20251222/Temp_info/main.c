@@ -12,17 +12,13 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
 
 int main(int argc, char *argv[])
 {
-    // Отключаем буферизацию
-    setbuf(stdout, NULL);
-    setbuf(stderr, NULL);
-
     // Установка кодировки UTF-8 для Windows
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
         SetConsoleCP(CP_UTF8);
     #endif
 
-    sensor_data data = {0};
+    sensor_data data = {0};         //инициализуруем нулями, чтоб не попался мусор
     data.info = malloc(600000 * sizeof(sensor));  // 4.58 МБ в куче
 
     uint16_t year = 0;
@@ -35,25 +31,25 @@ int main(int argc, char *argv[])
     if (parse_result == 1)
     {
         // Был вызван -h, программа завершается
-        fprintf(stderr, "Help requested, exiting...\n");
+        fprintf(stderr, "Help отображен, программа завершена...\n");
         return 0;
     }
     else if (parse_result != 0)
     {
         // Ошибка парсинга
-        fprintf(stderr, "Failed to parse arguments (error code: %d)\n", parse_result);
-        fprintf(stderr, "Use -h for help\n");
+        fprintf(stderr, "Неудача при парсинге аргументов (код ошибки: %d)\n", parse_result);
+        fprintf(stderr, "Используйте -h для вфзова help\n");
         return 1;
     }
 
     // Проверяем, что имя файла получено
     if (!filename)
     {
-        fprintf(stderr, "No filename provided\n");
+        fprintf(stderr, "Нет указанного файла в текущей директории\n");
         return 1;
     }
 
-    printf("Parameters: year=%u, month=%u, file=%s\n", year, month, filename);
+    printf("Полученные параметры: год=%u, месяц=%u, имя файла=%s\n", year, month, filename);
     fflush(stdout);
 
     // Загрузка данных из файла
@@ -61,13 +57,13 @@ int main(int argc, char *argv[])
 
     if (load_result != 0)
     {
-        fprintf(stderr, "Failed to load data from %s (error code: %d)\n",
+        fprintf(stderr, "Ошибка загрузки данных из файла %s (код ошибки: %d)\n",
                 filename, load_result);
         free(filename);
         return 1;
     }
 
-    printf("Successfully loaded %u records\n", data.number);
+    printf("Успешно загружено %u записи (ей)\n", data.number);
     fflush(stdout);
 
     // Определяем, какую статистику выводить
@@ -76,14 +72,14 @@ int main(int argc, char *argv[])
     if (month == 0)
     {
         // Если месяц не указан или равен 0 - выводим годовую статистику
-        printf("\n=== Yearly statistics ===\n");
+        printf("\n=== Статистика за год ===\n");
         fflush(stdout);
         stat_result = print_yearly_stats(&data, year);
     }
     else
     {
         // Выводим месячную статистику
-        printf("\n=== Monthly statistics ===\n");
+        printf("\n=== Статистика за месяц ===\n");
         fflush(stdout);
         stat_result = print_monthly_stats(&data, year, month);
     }
@@ -91,22 +87,17 @@ int main(int argc, char *argv[])
     // Обрабатываем результат вывода статистики
     if (stat_result == -2)
     {
-        printf("No data available for the specified period\n");
+        printf("Нет данных за указанный период\n");
     }
     else if (stat_result != 0)
     {
-        fprintf(stderr, "Error calculating statistics (code: %d)\n", stat_result);
+        fprintf(stderr, "Ошибка обработки статстики (код ошибки: %d)\n", stat_result);
     }
 
     // Очистка памяти
     free(filename);
 
-    printf("\n=== PROGRAM END ===\n");
-
-    // Пауза только в Windows
-    #ifdef _WIN32
-        system("pause");
-    #endif
+    printf("\n=== ПРОГРАММА ЗАВЕРШЕНА ===\n");
 
     return 0;
 }
@@ -128,7 +119,7 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
         *p_month = 0;
 
     // Значения по умолчанию
-    year = 2025; // год по умолчанию
+    year = 2021; // год по умолчанию
     month = 0;   // месяц по умолчанию (0 = не указан)
 
     // ВАЖНО: убрано ::
@@ -148,7 +139,7 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
                     file = malloc(strlen(optarg) + 5);
                     if (!file)
                     {
-                        fprintf(stderr, "Error: memory allocation failed\n");
+                        fprintf(stderr, "Ошибка: ошибка выделения памяти\n");
                         return -1;
                     }
 
@@ -160,17 +151,17 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
                     {
                         strcpy(file, optarg);
                     }
-                    fprintf(stderr, "File specified: %s\n", file);
+                    fprintf(stderr, "Статистика из файла: %s\n", file);
                 }
                 else
                 {
-                    fprintf(stderr, "Error: filename cannot be empty\n");
+                    fprintf(stderr, "Ошибка: имя файла не может быть пустым\n");
                     return -1;
                 }
             }
             else
             {
-                fprintf(stderr, "Error: -f requires a filename argument\n");
+                fprintf(stderr, "Ошибка: параметр -f требует указания имени файла\n");
                 return -1;
             }
             break;
@@ -179,8 +170,8 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
         {
             if (optarg == NULL)
             {
-                fprintf(stderr, "Year argument default - 2025\n");
-                year = 2025;
+                fprintf(stderr, "Выбран год по умолчанию - 2021\n");
+                year = 2021;
             }
             else
             {
@@ -189,23 +180,23 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
 
                 if (*endptr != '\0')
                 {
-                    fprintf(stderr, "Warning: invalid year format '%s', using 2025\n", optarg);
-                    year = 2025;
+                    fprintf(stderr, "Ошибка: неправильный формат года '%s', используем 2021\n", optarg);
+                    year = 2021;
                 }
                 else if (y >= 0 && y < 100)
                 {
                     year = 2000 + (uint16_t)y;
-                    fprintf(stderr, "Year: %u (from %s)\n", year, optarg);
+                    fprintf(stderr, "Гдод: %u (from %s)\n", year, optarg);
                 }
                 else if (y >= 2000 && y <= 2100)
                 {
                     year = (uint16_t)y;
-                    fprintf(stderr, "Year: %u\n", year);
+                    fprintf(stderr, "Год: %u\n", year);
                 }
                 else
                 {
-                    fprintf(stderr, "Warning: year %ld out of range, using 2025\n", y);
-                    year = 2025;
+                    fprintf(stderr, "Внимание: год %ld вне допустимого диапазона [2000...2100], используем 2021\n", y);
+                    year = 2021;
                 }
             }
             break;
@@ -215,7 +206,7 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
         {
             if (optarg == NULL)
             {
-                fprintf(stderr, "Month argument default - 0 (yearly stats)\n");
+                fprintf(stderr, "Значение месяца - 0 (проводим годовую статстику)\n");
                 month = 0;
             }
             else
@@ -225,25 +216,26 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
 
                 if (*endptr != '\0')
                 {
-                    fprintf(stderr, "Warning: invalid month format '%s', using 0\n", optarg);
+                    fprintf(stderr, "Внимание: неправильный формат месяца '%s', используем 0\n", optarg);
                     month = 0;
                 }
                 else if (tmp < 1 || tmp > 12)
                 {
-                    fprintf(stderr, "Warning: month %ld out of range [1..12], using 0\n", tmp);
+                    fprintf(stderr, "Внимание: месяц %ld вне диапазона [1..12], используем 0\n", tmp);
                     month = 0;
                 }
                 else
                 {
                     month = (uint8_t)tmp;
-                    fprintf(stderr, "Month: %u\n", month);
+                    fprintf(stderr, "Месяц: %u\n", month);
                 }
             }
             break;
         }
 
         case '?':
-            fprintf(stderr, "Error: unknown option\n");
+            fprintf(stderr, "Ошибка: неизвестный ключ\n");
+            print_help();
             return -1;
         }
     }
@@ -251,8 +243,8 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
     // Проверяем обязательные параметры
     if (file == NULL)
     {
-        fprintf(stderr, "Error: -f <filename> is required\n");
-        fprintf(stderr, "Use -h for help\n");
+        fprintf(stderr, "Ошибка: -f <имя файла> это обязательно\n");
+        fprintf(stderr, "Используйте -h для вызова help\n");
         return -1;
     }
 

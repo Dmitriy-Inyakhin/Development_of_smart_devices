@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#define MAX_RECORDS 600000 // исходя из количества тестовых записей примерно берем в 2 раза больше буфер
-
 // Структура: год, месяц, день, час, минута, температура [-99..+99]
 typedef struct __attribute__((packed))
 {
@@ -48,7 +46,9 @@ typedef struct
     uint32_t count;
 } yearly_stats;
 
-// Работа с файлами
+//  === Работа с файлами ===
+
+//загрузка данных из файла
 int load_data_from_file(sensor_data *d, const char *filename);
 
 // Функция safe_fopen - это "безопасная" обертка над стандартной функцией fopen из языка C
@@ -57,7 +57,7 @@ FILE *safe_fopen(const char *path, const char *mode);
 // Функция для очистки памяти 
 void cleanup_filename(char *filename);
 
-// === Статистика (заглушки) ===
+// === Статистика ===
 
 // Выводим статистику за месяц года
 int print_monthly_stats(const sensor_data *data, uint16_t year, uint8_t month);
@@ -66,8 +66,7 @@ int print_monthly_stats(const sensor_data *data, uint16_t year, uint8_t month);
 int print_yearly_stats(const sensor_data *data, uint16_t year);
 
 
-
-// функция печати "хелпа"
+// === Функция печати "хелпа" ===
 void print_help();
 
 #endif // TEMP_FUNCTIONS_H
