@@ -4,7 +4,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h> // для setlocale
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include "temp_functions.h"
 
 // функция парсинга вводимых параметров
@@ -12,14 +17,17 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
 
 int main(int argc, char *argv[])
 {
-    // Установка кодировки UTF-8 для Windows
-    #ifdef _WIN32
-        SetConsoleOutputCP(CP_UTF8);
-        SetConsoleCP(CP_UTF8);
-    #endif
+    // Установка кодировки UTF-8
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#elif defined(__APPLE__)
+    setlocale(LC_ALL, "en_US.UTF-8");
+    // Альтернатива: setlocale(LC_CTYPE, ""); — но может не дать UTF-8 в консоли
+#endif
 
-    sensor_data data = {0};         //инициализуруем нулями, чтоб не попался мусор
-    data.info = malloc(600000 * sizeof(sensor));  // 4.58 МБ в куче
+    sensor_data data = {0};                      // инициализуруем нулями, чтоб не попался мусор
+    data.info = malloc(600000 * sizeof(sensor)); // 4.58 МБ в куче
 
     uint16_t year = 0;
     uint8_t month = 0;
@@ -251,8 +259,7 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
     // Возвращаем результаты через указатели
     if (p_year)
         *p_year = year;
-    if (p_month)
-        *p_month = month;
+    *p_month = month;
     if (filename)
         *filename = file;
 
