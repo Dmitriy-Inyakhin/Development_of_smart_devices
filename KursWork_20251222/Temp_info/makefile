@@ -1,20 +1,41 @@
-#makefile
-all: temp_info.exe
+# Компилятор и флаги
+CC := gcc
+CFLAGS := -Wall -Wextra -std=c99 -O2
 
-temp_info.exe: main.o temp_functions.o
-	gcc -o temp_info.exe main.o temp_functions.o
+# Имя исполняемого файла (единое, с .exe на Windows)
+UNAME_S := $(shell uname -s 2>/dev/null)
+ifeq ($(OS),Windows_NT)
+    TARGET := temp_info.exe
+    RUN_CMD := ./temp_info.exe
+else ifeq ($(UNAME_S),Darwin)
+    TARGET := sensor_app
+    RUN_CMD := ./sensor_app
+else
+    TARGET := sensor_app
+    RUN_CMD := ./sensor_app
+endif
+
+# Объектные файлы
+OBJS := main.o temp_functions.o
+
+# Сборка
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
 main.o: main.c temp_functions.h
-	gcc -c main.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 temp_functions.o: temp_functions.c temp_functions.h
-	gcc -c temp_functions.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Очистка — единая для всех ОС
 clean:
-	rm -f *.o
-	
-clean_all:
-	rm -f *.o temp_info.exe
+	-rm -f $(OBJS) $(TARGET)
 
-run: temp_info.exe
-	./temp_info -h
+# Запуск
+.PHONY: all clean run
+
+run: $(TARGET)
+	$(RUN_CMD) -h

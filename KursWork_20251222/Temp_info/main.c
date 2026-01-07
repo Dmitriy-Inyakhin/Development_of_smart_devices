@@ -1,4 +1,4 @@
-// temp_info.c
+// main.c
 
 #include <stdio.h>
 #include <unistd.h>
@@ -12,9 +12,10 @@
 
 #include "temp_functions.h"
 
-// функция парсинга вводимых параметров
+// Функция парсинга вводимых параметров (объявление)
 static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_month, char **filename);
 
+// Главная функция программы
 int main(int argc, char *argv[])
 {
     // Установка кодировки UTF-8
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 #endif
 
     sensor_data data = {0};                      // инициализуруем нулями, чтоб не попался мусор
-    data.info = malloc(600000 * sizeof(sensor)); // 4.58 МБ в куче
+    data.info = malloc(600000 * sizeof(sensor)); // ~ 4.58 МБ в куче
 
     uint16_t year = 0;
     uint8_t month = 0;
@@ -39,14 +40,19 @@ int main(int argc, char *argv[])
     if (parse_result == 1)
     {
         // Был вызван -h, программа завершается
-        fprintf(stderr, "Help отображен, программа завершена...\n");
+        fprintf(stdout, "=== ПРОГРАММА ЗАВЕРШЕНА ===\n");
         return 0;
+    }
+    else if (parse_result == -2)
+    {
+        fprintf(stderr, "=== ПРОГРАММА ЗАВЕРШЕНА ===\n");
+        return 1;
     }
     else if (parse_result != 0)
     {
         // Ошибка парсинга
-        fprintf(stderr, "Неудача при парсинге аргументов (код ошибки: %d)\n", parse_result);
-        fprintf(stderr, "Используйте -h для вфзова help\n");
+        fprintf(stderr, "Используйте -h для вызова help\n");
+        fprintf(stderr, "=== ПРОГРАММА ЗАВЕРШЕНА ===\n");
         return 1;
     }
 
@@ -71,8 +77,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("Успешно загружено %u записи (ей)\n", data.number);
-    fflush(stdout);
+    printf("Успешно загружено %u записи (ей) из файла\n", data.number);
+    fflush(stdout); // принудительно сбрасывает (очищает) буфер стандартного потока вывода stdout,
+                    // то есть выводит всё, что накопилось в буфере, на терминал (или в файл/канал)
+                    // немедленно.
 
     // Определяем, какую статистику выводить
     int stat_result;
@@ -110,7 +118,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// функция парсинга вводимых параметров
+// Функция парсинга вводимых параметров (реализация)
 static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_month, char **filename)
 {
     int rez = 0;
@@ -130,48 +138,33 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
     year = 2021; // год по умолчанию
     month = 0;   // месяц по умолчанию (0 = не указан)
 
-    // ВАЖНО: убрано ::
+    // Определяем аргументы для передачи в программу
     while ((rez = getopt(argc, argv, "hf:y:m:")) != -1)
     {
         switch (rez)
         {
         case 'h':
             print_help();
-            return 1; // ВОЗВРАЩАЕМ 1!
+            return 1; // Возвращаем 1
 
         case 'f':
-            if (optarg)
-            {
-                if (strlen(optarg) > 0)
-                {
-                    file = malloc(strlen(optarg) + 5);
-                    if (!file)
-                    {
-                        fprintf(stderr, "Ошибка: ошибка выделения памяти\n");
-                        return -1;
-                    }
 
-                    if (strstr(optarg, ".csv") == NULL)
-                    {
-                        sprintf(file, "%s.csv", optarg);
-                    }
-                    else
-                    {
-                        strcpy(file, optarg);
-                    }
-                    fprintf(stderr, "Статистика из файла: %s\n", file);
-                }
-                else
-                {
-                    fprintf(stderr, "Ошибка: имя файла не может быть пустым\n");
-                    return -1;
-                }
+            file = malloc(strlen(optarg) + 5);
+            if (!file)
+            {
+                fprintf(stderr, "Ошибка: ошибка выделения памяти\n");
+                return -1;
+            }
+
+            if (strstr(optarg, ".csv") == NULL)
+            {
+                sprintf(file, "%s.csv", optarg);
             }
             else
             {
-                fprintf(stderr, "Ошибка: параметр -f требует указания имени файла\n");
-                return -1;
+                strcpy(file, optarg);
             }
+
             break;
 
         case 'y':
@@ -186,20 +179,13 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
                 char *endptr;
                 long y = strtol(optarg, &endptr, 10);
 
-                if (*endptr != '\0')
-                {
-                    fprintf(stderr, "Ошибка: неправильный формат года '%s', используем 2021\n", optarg);
-                    year = 2021;
-                }
-                else if (y >= 0 && y < 100)
+                if (y >= 0 && y <= 100)
                 {
                     year = 2000 + (uint16_t)y;
-                    fprintf(stderr, "Гдод: %u (from %s)\n", year, optarg);
                 }
                 else if (y >= 2000 && y <= 2100)
                 {
                     year = (uint16_t)y;
-                    fprintf(stderr, "Год: %u\n", year);
                 }
                 else
                 {
@@ -235,16 +221,29 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
                 else
                 {
                     month = (uint8_t)tmp;
-                    fprintf(stderr, "Месяц: %u\n", month);
                 }
             }
             break;
         }
 
         case '?':
-            fprintf(stderr, "Ошибка: неизвестный ключ\n");
-            print_help();
-            return -1;
+            if (optopt == 'f')
+            {
+                fprintf(stderr, "Ошибка: параметр -f требует имени файла\n");
+                return -1;
+            }
+            else if (optopt == 'y' || optopt == 'm')
+            {
+                fprintf(stderr, "Ошибка: параметр -%c требует числового значения\n", optopt);
+                return -1;
+            }
+            else
+            {
+                fprintf(stderr, "Ошибка: неизвестный параметр -%c\n", optopt);
+                print_help();
+                return -2;
+            }
+            break;
         }
     }
 
@@ -252,7 +251,6 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
     if (file == NULL)
     {
         fprintf(stderr, "Ошибка: -f <имя файла> это обязательно\n");
-        fprintf(stderr, "Используйте -h для вызова help\n");
         return -1;
     }
 
