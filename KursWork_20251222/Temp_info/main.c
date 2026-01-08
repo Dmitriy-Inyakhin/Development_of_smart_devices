@@ -18,7 +18,7 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
 // Главная функция программы
 int main(int argc, char *argv[])
 {
-    // Установка кодировки UTF-8
+    // Установка кодировки UTF-8 выборочно для винды и мака
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
