@@ -5,8 +5,8 @@ CFLAGS := -Wall -Wextra -std=c99 -O2
 # Имя исполняемого файла (единое, с .exe на Windows)
 UNAME_S := $(shell uname -s 2>/dev/null)
 ifeq ($(OS),Windows_NT)
-    TARGET := temp_info.exe
-    RUN_CMD := ./temp_info.exe
+    TARGET := sensor_app.exe
+    RUN_CMD := ./sensor_app.exe
 else ifeq ($(UNAME_S),Darwin)
     TARGET := sensor_app
     RUN_CMD := ./sensor_app

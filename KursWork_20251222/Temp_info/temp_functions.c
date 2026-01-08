@@ -89,44 +89,6 @@ static void compute_monthly_stats(const sensor_data *data, uint16_t year,
     }
 }
 
-// Функция вывода одной строки таблицы помесячной статистики
-// Соответствует формату:
-//   №   Год    Месяц  КолЗап  ПлохЗап  СрдТемп  МинТемп  МаксТемп
-// Пример: 1   2021   01     3        1        -44.67   -47      -43
-static void print_monthly_row(uint32_t row_num, uint16_t year, const monthly_stats *mstat, uint32_t bad)
-{
-    // Столбец 1: номер строки в таблице (1..12)
-    printf("%u", row_num);
-
-    // Столбец 2: год (с ведущими нулями до 4 цифр)
-    printf("\t%04u", year);
-
-    // Столбец 3: месяц (с ведущим нулём, 01..12)
-    printf("\t%02u", mstat->month);
-
-    // Столбец 4: количество КОРРЕКТНЫХ записей за месяц
-    printf("\t%u", mstat->count);
-
-    // Столбец 5: количество ИСПОРЧЕННЫХ записей за месяц (из bad_count)
-    printf("\t%u", bad);
-
-    // Столбцы 6-8: температурные показатели
-    if (mstat->count > 0)
-    {
-        // Если есть корректные записи — выводим числа
-        printf("\t%.2f", mstat->avg_temp); // средняя с 2 знаками после запятой
-        printf("\t%+d", mstat->min_temp);  // %+d даёт знак: +5, -10
-        printf("\t%+d", mstat->max_temp);
-    }
-    else
-    {
-        // Если записей нет — выводим N/A (Not Available)
-        printf("\tN/A\tN/A\tN/A");
-    }
-
-    // Завершаем строку
-    printf("\n");
-}
 
 // Функция расчёта общей годовой статистики на основе помесячных данных
 // Вход:
@@ -175,6 +137,45 @@ static void compute_yearly_stats(const monthly_stats *months, yearly_stats *ysta
         ystat->avg_temp = total_sum / total_good;
     }
     // Если записей нет — avg_temp остаётся 0.0 (но функция вызывающая проверит count == 0)
+}
+
+// Функция вывода одной строки таблицы помесячной статистики
+// Соответствует формату:
+//   №   Год    Месяц  КолЗап  ПлохЗап  СрдТемп  МинТемп  МаксТемп
+// Пример: 1   2021   01     3        1        -44.67   -47      -43
+static void print_monthly_row(uint32_t row_num, uint16_t year, const monthly_stats *mstat, uint32_t bad)
+{
+    // Столбец 1: номер строки в таблице (1..12)
+    printf("%u", row_num);
+
+    // Столбец 2: год (с ведущими нулями до 4 цифр)
+    printf("\t%04u", year);
+
+    // Столбец 3: месяц (с ведущим нулём, 01..12)
+    printf("\t%02u", mstat->month);
+
+    // Столбец 4: количество КОРРЕКТНЫХ записей за месяц
+    printf("\t%u", mstat->count);
+
+    // Столбец 5: количество ИСПОРЧЕННЫХ записей за месяц (из bad_count)
+    printf("\t%u", bad);
+
+    // Столбцы 6-8: температурные показатели
+    if (mstat->count > 0)
+    {
+        // Если есть корректные записи — выводим числа
+        printf("\t%.2f", mstat->avg_temp); // средняя с 2 знаками после запятой
+        printf("\t%+d", mstat->min_temp);  // %+d даёт знак: +5, -10
+        printf("\t%+d", mstat->max_temp);
+    }
+    else
+    {
+        // Если записей нет — выводим N/A (Not Available)
+        printf("\tN/A\tN/A\tN/A");
+    }
+
+    // Завершаем строку
+    printf("\n");
 }
 
 // Функция сравнение двух времён Возвращает: -1 — t1 < t2, 0 — t1 == t2, +1 — t1 > t2
@@ -299,15 +300,6 @@ int load_data_from_file(sensor_data *d, const char *filename)
     return -4;
 }
 
-// Функция для очистки памяти
-void cleanup_filename(char *filename)
-{
-    if (filename)
-    {
-        free(filename);
-    }
-}
-
 //=======================================================
 // === Функции  статистики ===                          |
 //=======================================================
@@ -328,22 +320,6 @@ int print_monthly_stats(const sensor_data *data, uint16_t year, uint8_t month)
         return -1;
     }
 
-    // === Подсчёт ОБЩЕГО числа испорченных записей во всём файле  ===
-    int invalid_counter = 0;
-    for (uint32_t i = 0; i < data->number; i++)
-    {
-        if (data->info[i].is_valid != 0)
-        {
-            invalid_counter++;
-        }
-    }
-
-    // Выводим информацию о пропущенных записях
-    if (invalid_counter > 0)
-    {
-        printf("Внимание: в файле пропущено %d испорченных записей\n", invalid_counter);
-    }
-
     // Сбор статистики по месяцам
     monthly_stats good_stats[12];
     uint32_t bad_count[12];
@@ -352,11 +328,17 @@ int print_monthly_stats(const sensor_data *data, uint16_t year, uint8_t month)
     const monthly_stats *mstat = &good_stats[month - 1];
     uint32_t bad = bad_count[month - 1];
 
+    // Выводим информацию о пропущенных записях
+    if (bad > 0)
+    {
+        printf("Внимание: пропущено %u испорченных записей за %04u-%02u\n", bad, year, month);
+    }
+
     // Проверка: есть ли корректные данные за месяц
     if (mstat->count == 0)
     {
         printf("\n[Статистика за %04d-%02d]\n", year, month);
-        
+
         return -2;
     }
 
@@ -382,22 +364,6 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
         return -1;
     }
 
-    // === Подсчёт ОБЩЕГО числа испорченных записей во всём файле ===
-    int invalid_counter = 0;
-    for (uint32_t i = 0; i < data->number; i++)
-    {
-        if (data->info[i].is_valid != 0)
-        {
-            invalid_counter++;
-        }
-    }
-
-    // Выводим информацию о пропущенных записях
-    if (invalid_counter > 0)
-    {
-        printf("Внимание: в файле пропущено %d испорченных записей\n", invalid_counter);
-    }
-
     // Сбор статистики
     monthly_stats good_stats[12];
     uint32_t bad_count[12];
@@ -409,7 +375,7 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
 
     if (ystat.count == 0)
     {
-        //printf("Нет корректных данных за указанный год.\n");
+        // printf("Нет корректных данных за указанный год.\n");
         return -2;
     }
     else
@@ -421,7 +387,7 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
             print_monthly_row((uint32_t)(m + 1), year, &good_stats[m], bad_count[m]);
         }
     }
-
+    // === Подсчёт ОБЩЕГО числа испорченных записей во всём файле ===
     uint32_t total_bad = 0;
     for (int m = 0; m < 12; m++)
         total_bad += bad_count[m];
@@ -429,10 +395,12 @@ int print_yearly_stats(const sensor_data *data, uint16_t year)
     printf("\n[Годовая статистика за %04u]\n", ystat.year);
     printf("Обработано корректных записей: %u\n", ystat.count);
 
+    // Выводим информацию о пропущенных записях
     if (total_bad > 0)
     {
-        printf("Пропущено испорченных записей в запрошенном году: %u\n", total_bad);
+        printf("Внимание: пропущено %u испорченных записей за %04u год\n", total_bad, year);
     }
+
     if (ystat.count != ystat.count + total_bad)
     {
         printf("Всего записей за год: %u\n", ystat.count + total_bad);

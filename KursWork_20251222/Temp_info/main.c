@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     sensor_data data = {0};                      // инициализуруем нулями, чтоб не попался мусор
     data.info = malloc(600000 * sizeof(sensor)); // ~ 4.58 МБ в куче
 
-    uint16_t year = 0;
+    uint16_t year = 2021;
     uint8_t month = 0;
     char *filename = NULL;
 
@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
     }
 
     printf("Полученные параметры: год=%u, месяц=%u, имя файла=%s\n", year, month, filename);
-    fflush(stdout);
 
     // Загрузка данных из файла
     int load_result = load_data_from_file(&data, filename);
@@ -78,9 +77,6 @@ int main(int argc, char *argv[])
     }
 
     printf("Успешно загружено %u записи (ей) из файла\n", data.number);
-    fflush(stdout); // принудительно сбрасывает (очищает) буфер стандартного потока вывода stdout,
-                    // то есть выводит всё, что накопилось в буфере, на терминал (или в файл/канал)
-                    // немедленно.
 
     // Определяем, какую статистику выводить
     int stat_result;
@@ -89,14 +85,12 @@ int main(int argc, char *argv[])
     {
         // Если месяц не указан или равен 0 - выводим годовую статистику
         printf("\n=== Статистика за год ===\n");
-        fflush(stdout);
         stat_result = print_yearly_stats(&data, year);
     }
     else
     {
         // Выводим месячную статистику
         printf("\n=== Статистика за месяц ===\n");
-        fflush(stdout);
         stat_result = print_monthly_stats(&data, year, month);
     }
 
@@ -122,17 +116,17 @@ int main(int argc, char *argv[])
 static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_month, char **filename)
 {
     int rez = 0;
-    uint16_t year = 0;
+    uint16_t year = 2021;
     uint8_t month = 0;
     char *file = NULL;
 
     // Инициализация выходных параметров
-    if (filename)
-        *filename = NULL;
     if (p_year)
-        *p_year = 0;
+        *p_year = year;
     if (p_month)
-        *p_month = 0;
+        *p_month = month;
+    if (filename)
+        *filename = file;
 
     // Значения по умолчанию
     year = 2021; // год по умолчанию
@@ -171,7 +165,6 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
         {
             if (optarg == NULL)
             {
-                fprintf(stderr, "Выбран год по умолчанию - 2021\n");
                 year = 2021;
             }
             else
@@ -179,7 +172,12 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
                 char *endptr;
                 long y = strtol(optarg, &endptr, 10);
 
-                if (y >= 0 && y <= 100)
+                if (*endptr != '\0')
+                {
+                    fprintf(stderr, "Внимание: неправильный формат года '%s', используем 2021\n", optarg);
+                    year = 2021;
+                }
+                else if (y >= 0 && y <= 100)
                 {
                     year = 2000 + (uint16_t)y;
                 }
@@ -200,7 +198,6 @@ static int parse_arguments(int argc, char *argv[], uint16_t *p_year, uint8_t *p_
         {
             if (optarg == NULL)
             {
-                fprintf(stderr, "Значение месяца - 0 (проводим годовую статстику)\n");
                 month = 0;
             }
             else
