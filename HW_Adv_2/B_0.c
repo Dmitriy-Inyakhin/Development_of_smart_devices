@@ -1,29 +1,29 @@
-// B_1.c
-// Всего памяти
-
-// Описана структура данных для хранения информации об использованной памяти:
+// Описана структура данных
 // typedef struct list {
-// void *address;
+// uint64_t address;
 // size_t size;
 // char comment[64];
 // struct list *next;
 // } list;
-// Требуется реализовать только одну функцию, которая анализирует данный 
-// список и возвращает сколько всего памяти используется. Адрес хранится 
-// в поле address, поле size - соответствующий размер данного блока. Если 
-// список пустой, то функция должна возвращать 0.
+// Требуется реализовать только одну функцию, которая в
+// данном списке находит адрес блока памяти занимающий
+// больше всего места.
+// Адрес хранится в поле address, поле size - соответствующий
+// размер данного блока. Если список пустой, то функция
+// должна возвращать 0. Если есть несколько таких блоков, т
+// о вернуть адрес любого из них.
 // Прототип функции:
 
-// size_t totalMemoryUsage(list *head)
-// Examples
+// uint64_t findMaxBlock(list *head)
 // Input
+
 // 3
 // 	  140525067852320 10
 // 	  140525067852350 30
 // 	  140525067852900 100
 // Output
-// 140
 
+// 140525067852900
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -55,17 +55,6 @@ uint64_t findMaxBlock(list *head)
         current = current->next;
     }
     return result_address;
-}
-size_t totalMemoryUsage(list *head)
-{
-    size_t max_size = 0;
-    list *current = head;
-    while (current != NULL)
-    {
-        max_size += current->size;
-        current = current->next;
-    }
-    return max_size;
 }
 
 // Функция добавления Ноды в список
@@ -110,9 +99,6 @@ int main(int argc, char **argv)
 
     uint64_t addr = findMaxBlock(head);
     printf("%" PRIu64 "\n", addr); // Выведет: 140525067852900
-
-    size_t size = totalMemoryUsage(head);
-    printf("%zu\n", size); // Выведет: 140
 
     // Освобождение памяти (по желанию)
     while (head)
