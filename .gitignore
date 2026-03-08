@@ -3,10 +3,14 @@
 *.exe
 *.json
 .vscode/*
+.vscode/
 *temp*
 *CodeRunner*
 *tmp*
 *tempCodeRunnerFile.c
+.DS_Store/*
+*.DS_Store
+.
 
 
 # Исключить файлы  из игнорирования
@@ -16,17 +20,15 @@
 !*.csv
 !makefile
 !Makefile
-!READMEE
-!.docx
+!README*
+!*.docx
 
-# Также важно не игнорировать папки, иначе Git не сможет пройти к .c-файлам внутри них
+# Также важно не игнорировать папки, 
+# иначе Git не сможет пройти к .c-файлам 
+# внутри них
 !*/
 
 # Обязательно разрешить сам .gitignore
 !.gitignore
 
 
-.DS_Store/*
-*.DS_Store
-.vscode/
-.
